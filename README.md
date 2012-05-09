@@ -31,7 +31,19 @@ Get historical daily stock prices:
 
 returns:
 
-    TODO
+    [ { :open => 15.51,
+        :high => 15.73,
+        :low => 15.5,
+        :close => 15.63,
+        :volume => 9799300,
+        :date => 2012-05-01 00:00:00 -0700 },
+      { :open => 15.58,
+        :high => 15.77,
+        :low => 15.54,
+        :close => 15.67,
+        :volume => 10841000,
+        :date => 2012-05-02 00:00:00 -0700 },
+      ... ]
 
 Get current options chain:
 
@@ -40,7 +52,27 @@ Get current options chain:
 
 returns:
 
-    TODO
+    # note that you can extract the symbol, expiry, put/call, and strike
+    # from the option symbol string.
+    [ { "YHOO120519C00009000" =>
+        { :last => 6.1,
+          :change => 0.0,
+          :bid => 0.0,
+          :ask => 0.0,
+          :volume => 5.0,
+          :open_int => 5.0,
+          :strike => 9.0,
+          :expires_at => 2012-05-19 00:00:00 -0700 } },
+     { "YHOO120519C00010000" =>
+        { :last => 5.7,
+          :change => 0.0,
+          :bid => 0.0,
+          :ask => 0.0,
+          :volume => 20.0,
+          :open_int => 107.0,
+          :strike => 10.0,
+          :expires_at => 2012-05-19 00:00:00 -0700 } },
+     ... ]
 
 Get the day's actives, % gainers, and % losers:
 
@@ -48,7 +80,10 @@ Get the day's actives, % gainers, and % losers:
 
 returns:
 
-    TODO
+    [ { :symbol => "FOSL", :name => "Fossil, Inc." },
+      { :symbol => "MAKO", :name => "MAKO Surgical Corp." },
+      { :symbol => "MRGE", :name => "Merge Healthcare Incorporated." },
+      ... ]
 
 You can also control how the http GET happens. Just instantiate with a
 getter that implements a `get` method that takes a single string argument
@@ -63,7 +98,7 @@ and returns the body of the request as a string.
     YahooFinance::Company.new('yhoo', getter: CustomGetter.new)
     YahooFinance::Actives.new(getter: CustomGetter.new)
 
-Why have a special getter? Because maybe you want to proxy via Tor so you
+Why have a custom getter? Because maybe you want to proxy via Tor so you
 don't get cut off for making lots of requests. See
 [Tor::Proxy](http://github.com/huned/tor_proxy) for a helpful gem.
 

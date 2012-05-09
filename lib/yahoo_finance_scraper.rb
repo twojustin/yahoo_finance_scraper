@@ -62,9 +62,6 @@ module YahooFinance
 
           results
         rescue Exception => e
-          require 'debugger'
-          debugger
-
           YahooFinance::Scraper.error [e.message, *e.backtrace].join("\n"), @logger
         end
       end
@@ -110,7 +107,7 @@ module YahooFinance
 
         # parse out expiry
         date_string = name.match(/#{symbol}(\d{6})/i)[1]
-        expires_at = Date.strptime date_string, '%y%m%d'
+        expires_at = Date.strptime(date_string, '%y%m%d').to_time
 
         # parse out +/- change
         style = tds[3].css('b').first['style']

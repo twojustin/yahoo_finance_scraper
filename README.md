@@ -27,7 +27,7 @@ Get historical daily stock prices:
 
     # Get historical daily stock prices of yhoo.
     # Note that `from` and `to` are both optional.
-    YahooFinance::Company.new('yhoo').historical_prices(from, to)
+    YahooFinance::Scraper::Company.new('yhoo').historical_prices(from, to)
 
 returns:
 
@@ -48,7 +48,7 @@ returns:
 Get current options chain:
 
     # Get the current options chain
-    YahooFinance::Company.new('yhoo').options_chain
+    YahooFinance::Scraper::Company.new('yhoo').options_chain
 
 returns:
 
@@ -76,7 +76,7 @@ returns:
 
 Get the day's actives, % gainers, and % losers:
 
-    YahooFinance::Actives.new.actives # or #gainers or #losers
+    YahooFinance::Scraper::Actives.new.actives # or #gainers or #losers
 
 returns:
 
@@ -95,8 +95,8 @@ and returns the body of the request as a string.
       end
     end
 
-    YahooFinance::Company.new('yhoo', getter: CustomGetter.new)
-    YahooFinance::Actives.new(getter: CustomGetter.new)
+    YahooFinance::Scraper::Company.new('yhoo', getter: CustomGetter.new)
+    YahooFinance::Scraper::Actives.new(getter: CustomGetter.new)
 
 Why have a custom getter? Because maybe you want to proxy via Tor so you
 don't get cut off for making lots of requests. See

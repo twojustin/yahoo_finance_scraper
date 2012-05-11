@@ -12,7 +12,7 @@ describe YahooFinance::Scraper do
       end
     end
 
-    describe '#details' do
+    context 'company details' do
       before do
         @getter = mock :getter
         @getter.stub(:get).with kind_of(String) do
@@ -22,13 +22,21 @@ describe YahooFinance::Scraper do
         @details = @scraper.details
       end
 
-      it 'should get details' do
-        @details.keys.should == YahooFinance::Scraper::Company::COLUMNS.keys
-        @details[:name].should == 'Yahoo! Inc.'
+      describe '#details' do
+        it 'should get details' do
+          @details.keys.should == YahooFinance::Scraper::Company::COLUMNS.keys
+          @details[:name].should == 'Yahoo! Inc.'
+        end
+      end
+
+      describe '#details_url' do
+        it 'should generate the correct url' do
+          @scraper.send(:details_url).should match(/s=yhoo/)
+        end
       end
     end
 
-    describe '#historical_prices' do
+    context 'historical prices' do
       before do
         @getter = mock :getter
         @getter.stub(:get).with kind_of(String) do
@@ -37,14 +45,22 @@ describe YahooFinance::Scraper do
         @scraper = YahooFinance::Scraper::Company.new 'yhoo', getter: @getter
       end
 
-      it 'should get historical prices' do
-        @scraper.historical_prices.should be_all do |h|
-          h.keys.sort == [ :close, :date, :high, :low, :open, :volume ]
+      describe '#historical_prices' do
+        it 'should get historical prices' do
+          @scraper.historical_prices.should be_all do |h|
+            h.keys.sort == [ :close, :date, :high, :low, :open, :volume ]
+          end
+        end
+      end
+
+      describe '#historical_prices_url' do
+        it 'should generate the correct url' do
+          @scraper.send(:historical_prices_url, Date.today, Date.today).should match(/s=yhoo/)
         end
       end
     end
 
-    describe '#options_chain' do
+    describe 'options chain' do
       before do
         @getter = mock :getter
         @getter.stub(:get).with kind_of(String) do |url|
@@ -57,9 +73,17 @@ describe YahooFinance::Scraper do
         @scraper = YahooFinance::Scraper::Company.new 'yhoo', getter: @getter
       end
 
-      it 'should get options chain' do
-        @scraper.options_chain.map(&:values).flatten.should be_all do |h|
-          h.keys.sort == [ :ask, :bid, :change, :expires_at, :last, :open_int, :strike, :volume ]
+      describe '#options_chain' do
+        it 'should get options chain' do
+          @scraper.options_chain.map(&:values).flatten.should be_all do |h|
+            h.keys.sort == [ :ask, :bid, :change, :expires_at, :last, :open_int, :strike, :volume ]
+          end
+        end
+      end
+
+      describe '#options_chain_url' do
+        it 'should generate the correct url' do
+          @scraper.send(:options_chain_url).should match(/s=yhoo/)
         end
       end
     end

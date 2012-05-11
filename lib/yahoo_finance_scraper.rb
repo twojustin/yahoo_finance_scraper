@@ -6,33 +6,18 @@ require 'nokogiri'
 
 module YahooFinance
   module Scraper
-    def self.error message, logger
-      if logger.respond_to? :error
-        logger.error message
-      else
-        warn message
-      end
-    end
-
     class Company
       attr_reader :symbol
       attr_accessor :getter
-      attr_accessor :logger
 
       def initialize symbol, options = {}
         @symbol = symbol
         @getter = options[:getter] || Net::HTTP
-        @logger = options[:logger]
       end
 
       def details
-        begin
-          name, *numeric_values = CSV.parse(get(details_url)).first
-          Hash[COLUMNS.keys.zip([name] + numeric_values.map(&:to_f))]
-        rescue Exception => e
-          # log instead of raise
-          YahooFinance::Scraper.error [e.message, *e.backtrace].join("\n"), @logger
-        end
+        name, *numeric_values = CSV.parse(get(details_url)).first
+        Hash[COLUMNS.keys.zip([name] + numeric_values.map(&:to_f))]
       end
 
       def historical_prices from = nil, to = nil
@@ -40,41 +25,32 @@ module YahooFinance
         from ||= to - 731 # 2 years (+ 1 day in case of leap year)
         url = historical_prices_url from, to
 
-        begin
-          CSV.parse(get(url))[1..-1].map do |row|
-            date, open, high, low, close, volume, adj_close = row
-            { open: open.to_f, high: high.to_f, low: low.to_f,
-              close: close.to_f, volume: volume.to_i,
-              date: Date.strptime(date, '%Y-%m-%d').to_time }
-          end.sort_by {|h| h[:date] }
-        rescue Exception => e
-          # log instead of raise
-          YahooFinance::Scraper.error [e.message, *e.backtrace].join("\n"), @logger
-        end
+        CSV.parse(get(url))[1..-1].map do |row|
+          date, open, high, low, close, volume, adj_close = row
+          { open: open.to_f, high: high.to_f, low: low.to_f,
+            close: close.to_f, volume: volume.to_i,
+            date: Date.strptime(date, '%Y-%m-%d').to_time }
+        end.sort_by {|h| h[:date] }
       end
 
       def options_chain
         results = []
         url = options_chain_url
 
-        begin
-          doc = Nokogiri::HTML get(url)
+        doc = Nokogiri::HTML get(url)
 
-          # current page
+        # current page
+        results += parse_options_chain_doc doc
+
+        # follow links to other expiration dates and parse those too
+        anchors = doc.css '#yfncsumtab a[href^="/q/op?s=%s&m="]' % symbol.upcase
+        anchors.each do |a|
+          m = a['href'].match(/(&m=\d{4}-\d{2})/)[1]
+          doc = Nokogiri::HTML get(url + m)
           results += parse_options_chain_doc doc
-
-          # follow links to other expiration dates and parse those too
-          anchors = doc.css '#yfncsumtab a[href^="/q/op?s=%s&m="]' % symbol.upcase
-          anchors.each do |a|
-            m = a['href'].match(/(&m=\d{4}-\d{2})/)[1]
-            doc = Nokogiri::HTML get(url + m)
-            results += parse_options_chain_doc doc
-          end
-
-          results
-        rescue Exception => e
-          YahooFinance::Scraper.error [e.message, *e.backtrace].join("\n"), @logger
         end
+
+        results
       end
 
       private
@@ -143,11 +119,9 @@ module YahooFinance
 
     class Actives
       attr_accessor :getter
-      attr_accessor :logger
 
       def initialize options = {}
         @getter = options[:getter] || Net::HTTP
-        @logger = options[:logger]
       end
 
       def losers ; fetch 'losers' ; end
@@ -170,14 +144,10 @@ module YahooFinance
         # for now, fetches across US exchanges only
         %w/us o aq nq/.map do |exchange|
           url = url_template % exchange
-          begin
-            doc = Nokogiri::HTML get(url)
-            doc.css('#yfitp tbody tr').map do |tr|
-              tds = tr.css 'td'
-              { symbol: tds[0].text.strip.upcase, name: tds[1].text.strip }
-            end
-          rescue Exception => e
-            YahooFinance::Scraper.error [e.message, *e.backtrace].join("\n"), @logger
+          doc = Nokogiri::HTML get(url)
+          doc.css('#yfitp tbody tr').map do |tr|
+            tds = tr.css 'td'
+            { symbol: tds[0].text.strip.upcase, name: tds[1].text.strip }
           end
         end.flatten.compact.uniq
       end

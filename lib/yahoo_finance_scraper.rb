@@ -1,4 +1,5 @@
 require "yahoo_finance_scraper/version"
+require "yahoo_finance_scraper/columns"
 require 'csv'
 require 'net/http'
 require 'nokogiri'
@@ -22,6 +23,16 @@ module YahooFinance
         @symbol = symbol
         @getter = options[:getter] || Net::HTTP
         @logger = options[:logger]
+      end
+
+      def details
+        begin
+          name, *numeric_values = CSV.parse(get(details_url)).first
+          Hash[COLUMNS.keys.zip([name] + numeric_values.map(&:to_f))]
+        rescue Exception => e
+          # log instead of raise
+          YahooFinance::Scraper.error [e.message, *e.backtrace].join("\n"), @logger
+        end
       end
 
       def historical_prices from = nil, to = nil
@@ -69,11 +80,18 @@ module YahooFinance
       private
 
       def get url
-        if @getter.is_a? Net::HTTP
+        if @getter.is_a?(Net::HTTP) || @getter == Net::HTTP
           @getter.get URI.parse(url)
         else
           @getter.get url
         end
+      end
+
+      def details_url
+        'http://download.finance.yahoo.com/d/quotes.csv?s=%s&f=%s' % [
+          symbol,
+          COLUMNS.values.join # just get everything
+        ]
       end
 
       def historical_prices_url from, to
@@ -139,7 +157,7 @@ module YahooFinance
       private
 
       def get url
-        if @getter.is_a? Net::HTTP
+        if @getter.is_a?(Net::HTTP) || @getter == Net::HTTP
           @getter.get URI.parse(url)
         else
           @getter.get url

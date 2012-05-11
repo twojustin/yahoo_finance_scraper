@@ -23,6 +23,22 @@ Or install it yourself as:
 
 By default, assumes you want to get data with Net::HTTP.
 
+Get company details:
+
+    YahooFinance::Scraper::Company.new('yhoo').details
+
+returns:
+
+    { :name => "Yahoo! Inc.",
+      :dividend_per_share => 0.0,
+      :earnings_per_share => 0.877,
+      :price_to_sales => 3.76,
+      :price_to_book => 1.46,
+      :price_to_earnings => 17.45,
+      :peg_ratio => 1.26,
+      :short_ratio => 1.9,
+      :dividend_yield => 0.0 }
+
 Get historical daily stock prices:
 
     # Get historical daily stock prices of yhoo.

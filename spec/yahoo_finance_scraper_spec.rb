@@ -12,6 +12,22 @@ describe YahooFinance::Scraper do
       end
     end
 
+    describe '#details' do
+      before do
+        @getter = mock :getter
+        @getter.stub(:get).with kind_of(String) do
+          File.read 'spec/fixtures/details.csv'
+        end
+        @scraper = YahooFinance::Scraper::Company.new 'yhoo', getter: @getter
+        @details = @scraper.details
+      end
+
+      it 'should get details' do
+        @details.keys.should == YahooFinance::Scraper::Company::COLUMNS.keys
+        @details[:name].should == 'Yahoo! Inc.'
+      end
+    end
+
     describe '#historical_prices' do
       before do
         @getter = mock :getter

@@ -79,12 +79,12 @@ module YahooFinance
       def historical_prices_url from, to
         'http://ichart.finance.yahoo.com/table.csv?s=%s&a=%s&b=%s&c=%s&d=%s&e=%s&f=%s&g=d&ignore=.csv' % [
           symbol, 
-          from.strftime('%m').gsub(from.month.to_s, (from.month - 1).to_s),
-          from.strftime('%d'),
-          from.strftime('%Y'),
-          to.strftime('%m').gsub(to.month.to_s, (to.month - 1).to_s),
-          to.strftime('%d'),
-          to.strftime('%Y')
+          from.month - 1,
+          from.day,
+          from.year,
+          to.month - 1,
+          to.day,
+          to.year
         ]
       end
 

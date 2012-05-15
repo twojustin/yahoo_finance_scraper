@@ -56,7 +56,7 @@ module YahooFinance
       private
 
       def get url
-        (@getter && @getter.get(url)) || Net::HTTP.get(URI.parse(url))
+        (getter && getter.get(url)) || Net::HTTP.get(URI.parse(url))
       end
 
       def details_url
@@ -117,7 +117,7 @@ module YahooFinance
       attr_accessor :getter
 
       def initialize options = {}
-        @getter = options[:getter] || Net::HTTP
+        @getter = options[:getter]
       end
 
       def losers ; fetch 'losers' ; end
@@ -127,11 +127,7 @@ module YahooFinance
       private
 
       def get url
-        if @getter.is_a?(Net::HTTP) || @getter == Net::HTTP
-          @getter.get URI.parse(url)
-        else
-          @getter.get url
-        end
+        (getter && getter.get(url)) || Net::HTTP.get(URI.parse(url))
       end
 
       def fetch resource

@@ -80,16 +80,6 @@ describe YahooFinance::Scraper do
   end
 
   describe YahooFinance::Scraper::Actives do
-    describe'.new' do
-      before do
-        @scraper = YahooFinance::Scraper::Actives.new
-      end
-
-      it 'should use custom http getter' do
-        @scraper.getter.should == Net::HTTP
-      end
-    end
-
     describe '#losers' do
       before do
         @getter = mock :getter

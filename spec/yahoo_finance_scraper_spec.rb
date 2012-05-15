@@ -2,16 +2,6 @@ require 'yahoo_finance_scraper'
 
 describe YahooFinance::Scraper do
   describe YahooFinance::Scraper::Company do
-    describe '.new' do
-      before do
-        @scraper = YahooFinance::Scraper::Company.new 'yhoo'
-      end
-
-      it 'should default to Net::HTTP as getter' do
-        @scraper.getter.should == Net::HTTP
-      end
-    end
-
     context 'company details' do
       before do
         @getter = mock :getter

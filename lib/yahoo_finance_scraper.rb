@@ -12,7 +12,7 @@ module YahooFinance
 
       def initialize symbol, options = {}
         @symbol = symbol
-        @getter = options[:getter] || Net::HTTP
+        @getter = options[:getter]
       end
 
       def details
@@ -56,11 +56,7 @@ module YahooFinance
       private
 
       def get url
-        if @getter.is_a?(Net::HTTP) || @getter == Net::HTTP
-          @getter.get URI.parse(url)
-        else
-          @getter.get url
-        end
+        (@getter && @getter.get(url)) || Net::HTTP.get(URI.parse(url))
       end
 
       def details_url
